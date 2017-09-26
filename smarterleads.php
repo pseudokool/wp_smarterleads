@@ -21,4 +21,38 @@
 	along with Newstream. If not, see {License URI}.
 	*/
 
+	register_activation_hook( __FILE__, 'wpsl_activate()' );
+	register_deactivation_hook(__FILE__, 'wpsl_deactivate()');
+
+	// watch for post add/updates
+	add_action('save_post', 'wpsl_save_lead', 10, 2);
+	function wpsl_save_lead($post_id, $post){
+		// echo 'POST_ID | '.$post_id;
+		// print_r($post);
+		//exit;
+
+	}
+
+	// render menu
+	function wpsl_options_page()
+	{
+	    add_menu_page(
+	        'WordPress SmarterLeads',
+	        'Leads',
+	        'manage_options',
+	        plugin_dir_path(__FILE__) . 'admin/view.php',
+	        null,
+	        'dashicons-universal-access',
+	        20
+	    );
+	}
+	add_action('admin_menu', 'wpsl_options_page');
+
+	function wpsl_activate(){
+
+	}
+	function wpsl_deactivate(){
+		
+	}
+
 ?>
