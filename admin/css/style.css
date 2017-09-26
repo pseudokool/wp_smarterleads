@@ -1,0 +1,12 @@
+.badge{
+	padding:5px;
+	border-radius: 12px;
+	color: #fff !important;
+	text-transform: capitalize !important;
+}
+.badge-archived{
+	background: #8e0000;
+}
+.badge-new{
+	background: #00695c;
+}

@@ -9,16 +9,38 @@ class Leads_Table extends WP_List_Table {
 	    'cb'        	 => '<input type="checkbox" />',
 	    'post_content' => 'Lead',
 	    'post_date'    => 'Date',
-	    'post_status'  => 'Status'
+	    'post_status'  => 'Status',
+	    'post_author' =>  'Assigned To'
 	  );
 	  return $columns;
 	}
+	function get_views(){
+   	$views = array();
+ 		$current = ( !empty($_REQUEST['customvar']) ? $_REQUEST['customvar'] : 'all');
+
+   	$foo_url = add_query_arg('customvar','publish');
+   	$class = ($current == 'publish' ? ' class="current"' :'');
+   	$views['foo'] = "<a href='{$foo_url}' {$class} >New</a>";
+
+   	$bar_url = add_query_arg('customvar','pending');
+   	$class = ($current == 'pending' ? ' class="current"' :'');
+   	$views['bar'] = "<a href='{$bar_url}' {$class} >Archived</a>";
+
+   	$class = ($current == 'all' ? ' class="current"' :'');
+   	$all_url = remove_query_arg('customvar');
+   	$views['all'] = "<a href='{$all_url }' {$class} >All</a>";
+
+	   
+	   return $views;
+	}
 
 	function prepare_items() {
+	  $customvar = ( isset($_REQUEST['customvar']) ? $_REQUEST['customvar'] : 'all');
+
 	  $columns = $this->get_columns();
 	  $hidden = array();
 	  $sortable = $this->get_sortable_columns();
-	  $this->_column_headers = array($columns, $hidden, $sortable);
+	  $this->_column_headers = array($columns, $hidden, $sortable, $customvar);
 
 	  $per_page = 4;
 	  $current_page = $this->get_pagenum();
@@ -103,10 +125,10 @@ class Leads_Table extends WP_List_Table {
 	function column_post_status($item) {
 	  $actions = array(
 	            'edit'      => sprintf('<a href="?page=%s&action=%s&lead=%s">Edit</a>',$_REQUEST['page'],'edit',$item['ID']),
-	            'delete'    => sprintf('<a href="?page=%s&action=%s&lead=%s">Delete</a>',$_REQUEST['page'],'delete',$item['ID']),
+	            'delete'    => sprintf('<a href="?page=%s&action=%s&lead=%s">Archive</a>',$_REQUEST['page'],'archive',$item['ID']),
 	        );
 
-	  return sprintf('%1$s %2$s', ($item['post_status']=='publish')?'New':'Archived', $this->row_actions($actions) );
+	  return sprintf('%1$s %2$s', ($item['post_status']=='publish')?'<span class="badge badge-new">new</span>':'Archived', $this->row_actions($actions) );
 	}
 
 	/**
@@ -148,8 +170,30 @@ class Leads_Table extends WP_List_Table {
 	    	$c = explode("\n",$item['post_content']);
 	    	return '<b>' . @$c[0] . '</b> <br/> ' . @$c[1];
 	    	break;
-	    case 'post_status':
+	    case 'post_author':
+	    	$args = array(
+			    'orderby'       => 'name', 
+			    'order'         => 'ASC', 
+			    'exclude_admin' => false, 
+			    'show_fullname' => false,
+			    'hide_empty'    => true,
+			    'echo'          => true,
+			    'style'         => 'list',
+			    'html'          => true,
+		 		); 
+		  	$users = get_users();
+		  	$s = '<select id="wpsl_assig_'.$item['ID'].'">';
+		  	foreach ( $users as $user ) {
+		  		$selected = '';
+		  		if($user->ID==$item['post_author']) $selected = 'selected';
+					$s .= '<option '.$selected.' value="'.$item['ID'].'##'.$user->ID.'" class="wpsl_assigned">' . esc_html( ucfirst($user->user_nicename) ) . '</option>';
+				}
+				$s .= '</select>';
+		  	return $s;
+		  	break;
+			case 'post_status':
 	    	return $item[ $column_name ];
+	    
 	    default:
 	      return print_r( $item, true ) ; // debug
 	  }

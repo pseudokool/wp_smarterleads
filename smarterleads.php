@@ -37,6 +37,7 @@
 	function wpsl_options_page()
 	{
 	    add_menu_page(
+	        // 'WordPress SmarterLeads',
 	        'WordPress SmarterLeads',
 	        'Leads',
 	        'manage_options',
@@ -47,6 +48,12 @@
 	    );
 	}
 	add_action('admin_menu', 'wpsl_options_page');
+
+	add_action('admin_enqueue_scripts', 'clbk_scripts');
+	function clbk_scripts() {
+	    wp_register_style( 'namespace', get_bloginfo('wpurl').'/wp-content/plugins/wp_smarterleads/admin/css/style.css' );
+	    wp_enqueue_style( 'namespace' );
+	}
 
 	function wpsl_activate(){
 
